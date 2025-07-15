@@ -1,0 +1,47 @@
+services:
+  # 1. Redisインスタンス
+  - type: redis
+    name: video-queue-redis
+    region: singapore
+    plan: free # 無料プランで十分
+
+  # 2. APIリクエストを受け付けるWebサービス
+  - type: web
+    name: video-api-server
+    env: node
+    region: singapore
+    plan: free
+    buildCommand: 'npm install'
+    startCommand: 'node src/web.js'
+    healthCheckPath: /health
+    envVars:
+      - fromService:
+          type: redis
+          name: video-queue-redis
+          property: connectionString # Redisの接続情報を環境変数として注入
+      - key: DISK_MOUNT_PATH
+        value: /mnt/data
+    disks:
+      - name: video-files-disk
+        mountPath: /mnt/data
+        sizeGB: 1 # 1GBの永続ディスク
+
+  # 3. 重い処理を実行するバックグラウンドワーカー
+  - type: worker
+    name: video-processor-worker
+    env: node
+    region: singapore
+    plan: free
+    buildCommand: 'npm install'
+    startCommand: 'node src/worker.js'
+    envVars:
+      - fromService:
+          type: redis
+          name: video-queue-redis
+          property: connectionString
+      - key: DISK_MOUNT_PATH
+        value: /mnt/data
+    disks:
+      - name: video-files-disk # Webサービスと同じディスクをマウント
+        mountPath: /mnt/data
+        sizeGB: 1
