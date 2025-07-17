@@ -2,6 +2,7 @@ import os
 import traceback
 from flask import Flask, request, jsonify
 from pytube import YouTube
+from pytube import request as pytube_request
 from pytube.exceptions import PytubeError, VideoUnavailable, RegexMatchError
 
 pytube_request.default_headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36'
