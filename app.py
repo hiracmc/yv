@@ -1,50 +1,50 @@
-from flask import Flask, request, jsonify
+#ライブラリ
+import numpy as np
+import matplotlib as plt
+import pandas as pd
+import scikit-learn
+import re
+from urllib.parse import urlparse, parse_qs
 from pytube import YouTube
-import logging
 
-# Flaskアプリケーションのインスタンスを作成
-app = Flask(__name__)
+# URLからiパラメータを取得する関数
+def get_i_parameter(url):
+    parsed_url = urlparse(url)
+    query_params = parse_qs(parsed_url.query)
+    return query_params.get('i', [None])[0]
 
-# ログ設定
-logging.basicConfig(level=logging.INFO)
-
-@app.route('/', methods=['GET'])
-def get_stream_url():
-    # URLのクエリパラメータから 'i' (YouTube動画ID) を取得
-    video_id = request.args.get('i')
-
-    # 'i' パラメータが存在しない場合はエラーメッセージを返す
-    if not video_id:
-        return jsonify({"error": "ビデオIDが指定されていません。'?i=<YouTubeのビデオID>' の形式で指定してください。"}), 400
-
+# YouTubeの動画ストリームURLを取得する関数
+def get_youtube_stream_url(video_id):
     try:
-        # YouTube動画のURLを構築
-        youtube_url = f"https://www.youtube.com/watch?v={video_id}"
-        app.logger.info(f"動画URLを処理中: {youtube_url}")
-
-        # pytubeでYouTubeオブジェクトを作成
-        yt = YouTube(youtube_url)
-
-        # 利用可能なストリームの中から、プログレッシブ（映像と音声が一体）で
-        # 解像度が最も高いものを取得
-        stream = yt.streams.filter(progressive=True, file_extension='mp4').get_highest_resolution()
-
-        # ストリームが見つかった場合は、そのURLをJSON形式で返す
-        if stream:
-            app.logger.info(f"ストリームURLが見つかりました: {stream.url}")
-            return jsonify({
-                "stream_url": stream.url
-            })
-        # ストリームが見つからない場合はエラーメッセージを返す
-        else:
-            app.logger.warning("利用可能なストリームが見つかりませんでした。")
-            return jsonify({"error": "利用可能なストリームが見つかりませんでした。"}), 404
-
+        # YouTubeオブジェクトを作成
+        yt = YouTube(f'https://www.youtube.com/watch?v={video_id}')
+        
+        # 最高画質の動画ストリームを取得
+        stream = yt.streams.get_highest_resolution()
+        
+        # ストリームURLを返す
+        return stream.url
     except Exception as e:
-        # その他のエラーが発生した場合
-        app.logger.error(f"エラーが発生しました: {e}")
-        return jsonify({"error": f"エラーが発生しました: {str(e)}"}), 500
+        print(f'エラーが発生しました: {str(e)}')
+        return None
 
+# メイン処理
 if __name__ == '__main__':
-    # この部分はRailwayでは使用されませんが、念のため残しておきます
-    app.run(host='0.0.0.0', port=8080)
+    # テスト用URL（実際の使用時は適切なURLに変更してください）
+    test_url = 'https://www.example.com/watch?v=dQw4w9WgXcQ&i=abcdefg'
+    
+    # iパラメータを取得
+    i_param = get_i_parameter(test_url)
+    
+    if i_param:
+        print(f'取得したiパラメータ: {i_param}')
+        
+        # YouTubeの動画ストリームURLを取得
+        stream_url = get_youtube_stream_url(i_param)
+        
+        if stream_url:
+            print(f'YouTubeの動画ストリームURL: {stream_url}')
+        else:
+            print('動画ストリームURLの取得に失敗しました。')
+    else:
+        print('iパラメータが見つかりませんでした。')
