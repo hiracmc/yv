@@ -4,6 +4,7 @@ import matplotlib as plt
 import pandas as pd
 import scikit-learn
 import re
+from flask import Flask, request
 from urllib.parse import urlparse, parse_qs
 from pytube import YouTube
 
@@ -34,7 +35,7 @@ if __name__ == '__main__':
     test_url = 'https://www.example.com/watch?v=dQw4w9WgXcQ&i=abcdefg'
     
     # iパラメータを取得
-    i_param = get_i_parameter(test_url)
+    i_param = get_i_parameter(request.url)
     
     if i_param:
         print(f'取得したiパラメータ: {i_param}')
