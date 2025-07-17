@@ -1,1 +1,0 @@
-vercelで、アクセスしたら、そのurlのパラメーター「v」からyoutube動画のidを取り出し、invidiousのインスタンス(https://invidious.nikkosphere.com/)のapiから取得したidの動画のデータを取得して、その中から"type":"audio/webmと"type":"video/webmの要素をそれぞれ1つずつ探して、その要素の中のurlパラメーターのurlを取得して、そこから動画と音声ファイルをそれぞれ取得して、二つを合成して1つのwebmファイルにするコードを生成して
