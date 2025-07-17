@@ -33,8 +33,6 @@ def get_stream_url():
         if stream:
             app.logger.info(f"ストリームURLが見つかりました: {stream.url}")
             return jsonify({
-                "video_id": video_id,
-                "title": yt.title,
                 "stream_url": stream.url
             })
         # ストリームが見つからない場合はエラーメッセージを返す
